@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ejercicio Tareas en Blazor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/main.js" defer></script>
+</head>
+<body>
+
+  <!-- ===== ENCABEZADO ===== -->
+  <header>
+    <p class="eyebrow">Blazor · Laboratorio cronometrado · 45 min</p>
+    <h1>Ejercicio <span class="spark">Tareas</span> en Blazor</h1>
+    <p class="lede">Vas a armar tu primera página en Blazor con Rider: una lista de tareas que agrega, edita y quita a través de un servicio inyectado. Después abrís dos pestañas, cambiás <b>una sola palabra</b> en <code class="inl">Program.cs</code> y mirás qué pasa con los datos.</p>
+    <div class="chips">
+      <span class="chip">página Blazor</span>
+      <span class="chip">@page</span>
+      <span class="chip">@inject</span>
+      <span class="chip">inyección de dependencias</span>
+      <span class="chip">Scoped</span>
+      <span class="chip">Singleton</span>
+      <span class="chip">CRUD en memoria</span>
+    </div>
+  </header>
+  <div class="wrap">
+
+    <!-- ===== ANTES DE ARRANCAR ===== -->
+    <div class="setup">
+      <h2>Antes de arrancar</h2>
+      <ul>
+        <li><span><b>Rider</b> instalado (cualquier versión reciente) y un navegador.</span></li>
+        <li><span>El <b>SDK de .NET 9</b>. Con .NET 10 también funciona; con .NET 8 no, porque usamos <code class="inl">RendererInfo</code>, que apareció en .NET 9.</span></li>
+        <li><span>Tiempo: <b>45 min</b>, en grupos de 3 o en parejas. Al final tenés una lista de tareas que agrega, edita y quita, con su propia opción en el menú, y sabés qué pasa con sus datos según el tipo de servicio que registres.</span></li>
+      </ul>
+      <pre data-file="Terminal" data-lang="sh">
+dotnet --version   # tiene que empezar con 9</pre>
+    </div>
+    <div class="steps">
+
+      <!-- ===== PASO 0: Crear el proyecto Blazor ===== -->
+      <section class="step" id="paso-0">
+        <div class="num">0</div>
+        <h3>Crear el proyecto Blazor</h3>
+        <p class="goal">Blazor Web App · net9.0</p>
+        <p>En Rider elegí <span class="menu">New Solution</span>. En el panel de la izquierda, dentro del grupo <b>.NET</b>, hacé click en <span class="menu">Web</span>. Completá así:</p>
+        <ul class="mini">
+          <li><b>Solution name</b> y <b>Project name:</b> <code class="inl">LabBlazor</code> — así tus namespaces coinciden con los del ejercicio</li>
+          <li><b>Solution directory:</b> la carpeta que prefieras. Dejá <b>sin tildar</b> <em>Put solution and project in the same directory</em> y <em>Create Git repository</em>.</li>
+          <li><b>Target framework:</b> <code class="inl">net9.0</code> (debería decir <em>from SDK 9.0</em>)</li>
+          <li><b>Language:</b> C#</li>
+          <li><b>Template:</b> <strong>Blazor Web App</strong>, la primera de la lista. No la que dice <em>Blazor WebAssembly Standalone App</em>, que está justo abajo.</li>
+        </ul>
+        <p>Apretá <span class="menu">Create</span>.</p>
+        <div class="call hint">
+          <span class="lbl">Plan B por terminal</span>
+          <p style="margin:0 0 8px">Si el asistente de Rider te da problemas, abrí la terminal de Rider en una carpeta vacía y pegá esto. Después <span class="menu">File → Open</span> y elegí el archivo <code class="inl">LabBlazor.csproj</code>.</p>
+          <pre data-file="Terminal" data-lang="sh">
+dotnet new blazor -o LabBlazor -int Server   # crea la carpeta LabBlazor con el proyecto</pre>
+        </div>
+        <p>Dale <kbd>▶ Run</kbd> (o <kbd>Shift+F10</kbd>) para confirmar que arranca. Después detenela con <kbd>■ Stop</kbd> antes de seguir.</p>
+        <div class="call check">
+          <span class="lbl">Checkpoint</span>En la consola de Rider aparece una línea que dice <code class="inl">Now listening on: http://localhost:PUERTO</code>. Quiere decir que tu aplicación ya está andando <b>en tu propia computadora</b>: <b>localhost</b> significa «esta máquina» y <b>PUERTO</b> es el número de la «puerta» por la que atiende (Rider elige uno y puede ser distinto en cada proyecto).<br><br><b>Abrí esa dirección en el navegador</b> (si Rider no la abrió solo, copiala y pegala en una pestaña nueva): tenés que ver la Home de la plantilla de Blazor, con su menú lateral. Anotá el PUERTO: lo usás en el paso 1.
+        </div>
+      </section>
+
+      <!-- ===== PASO 1: Tu primera página ===== -->
+      <section class="step" id="paso-1">
+        <div class="num">1</div>
+        <h3>Tu primera página</h3>
+        <p class="goal">@page + contenido + @code</p>
+        <p>Click derecho sobre la carpeta <code class="inl">Components/Pages</code> → <span class="menu">Add → Blazor Component</span>. Nombre: <code class="inl">Tareas</code>. No elijas <em>Razor Page</em>, que está justo debajo: crea otro tipo de página que no sirve para este ejercicio. Borrá todo lo que traiga el archivo y pegá esto:</p>
+        <pre data-file="Components/Pages/Tareas.razor" data-lang="cs">
+@page "/tareas"
+
+&lt;PageTitle&gt;Tareas&lt;/PageTitle&gt;
+
+&lt;h1&gt;Mis tareas&lt;/h1&gt;
+&lt;p&gt;Primera página Blazor de: &lt;strong&gt;@integrantes&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+    &lt;li&gt;Tarea de ejemplo 1&lt;/li&gt;
+    &lt;li&gt;Tarea de ejemplo 2&lt;/li&gt;
+&lt;/ul&gt;
+
+@code {
+    // TODO 1: escribí los nombres de tu equipo entre las comillas
+    private string integrantes = "";
+}</pre>
+        <p>Ahora ▶ Run y, en la barra de direcciones, escribí a mano <code class="inl">http://localhost:PUERTO/tareas</code>.</p>
+        <div class="call check">
+          <span class="lbl">Checkpoint</span>La página muestra el título <b>Mis tareas</b> con los nombres de tu equipo. Cuando lo veas, ■ Stop.
+        </div>
+        <div class="call hint">
+          <span class="lbl">Pista</span>La línea <code class="inl">@page "/tareas"</code> es la que crea la ruta: el nombre del archivo no importa. Lo que empieza con <code class="inl">@</code> es C# metido dentro del HTML.
+        </div>
+      </section>
+
+      <!-- ===== PASO 2: El servicio y la entidad ===== -->
+      <section class="step" id="paso-2">
+        <div class="num">2</div>
+        <h3>El servicio y la entidad</h3>
+        <p class="goal">una clase que guarda y modifica tareas</p>
+        <p>Click derecho sobre el proyecto <code class="inl">LabBlazor</code> → <span class="menu">Add → Class/Interface</span>, nombre <code class="inl">TareaServicio</code>. Reemplazá todo el contenido por esto. No hay nada que completar: es el servicio ya armado.</p>
+        <pre data-file="TareaServicio.cs" data-lang="cs">
+namespace LabBlazor;
+
+public class Tarea
+{
+    public int Id { get; set; }
+    public string Titulo { get; set; } = "";
+}
+
+public class TareaServicio
+{
+    private readonly List&lt;Tarea&gt; _tareas = new();
+    private int _proximoId = 1;
+
+    // Un código corto para reconocer cuál instancia del servicio estás usando.
+    public string IdInstancia { get; } = Guid.NewGuid().ToString("N")[..6];
+
+    public IReadOnlyList&lt;Tarea&gt; Listar() =&gt; _tareas;
+
+    public void Agregar(string titulo)
+    {
+        _tareas.Add(new Tarea { Id = _proximoId++, Titulo = titulo });
+    }
+
+    public void Quitar(int id)
+    {
+        _tareas.RemoveAll(t =&gt; t.Id == id);
+    }
+
+    public void Editar(int id, string nuevoTitulo)
+    {
+        var tarea = _tareas.FirstOrDefault(t =&gt; t.Id == id);
+        if (tarea is not null) tarea.Titulo = nuevoTitulo;
+    }
+}</pre>
+        <p>Fijate en tres cosas, porque las vamos a usar durante todo el ejercicio:</p>
+        <ul class="mini">
+          <li><code class="inl">Tarea</code> es la entidad: tiene un <code class="inl">Id</code> y un <code class="inl">Titulo</code>.</li>
+          <li><code class="inl">TareaServicio</code> guarda la lista en memoria y sabe <code class="inl">Listar</code>, <code class="inl">Agregar</code>, <code class="inl">Quitar</code> y <code class="inl">Editar</code>.</li>
+          <li><code class="inl">IdInstancia</code> es un código al azar que se genera <b>una sola vez, cuando se crea el objeto</b>. Sirve para reconocer qué instancia del servicio estamos usando.</li>
+        </ul>
+        <p>Compilá desde la terminal de Rider:</p>
+        <pre data-file="Terminal" data-lang="sh">
+dotnet build   # tiene que terminar en "Build succeeded."</pre>
+        <div class="call check">
+          <span class="lbl">Checkpoint</span>La compilación termina en <code class="inl">Build succeeded.</code> sin errores.
+        </div>
+      </section>
+
+      <!-- ===== PASO 3: Registrar, inyectar y conectar ===== -->
+      <section class="step" id="paso-3">
+        <div class="num">3</div>
+        <h3>Registrar, inyectar y conectar</h3>
+        <p class="goal">Program.cs + @inject + CRUD en pantalla</p>
+        <div class="call trap">
+          <span class="lbl">Regla de oro</span>Cada vez que toques <code class="inl">Program.cs</code>: <kbd>■ Stop</kbd> y después <kbd>▶ Run</kbd>. Con la app corriendo el cambio parece guardado, pero <b>no se aplica</b>: sigue funcionando la versión vieja y no da ningún error. Rider tiene una opción para que los cambios se actualicen sin reiniciar (se llama <em>Hot Reload</em>), pero buscarla queda por cuenta de cada uno. En este ejercicio, siempre Stop y Run.
+        </div>
+        <p><strong>3A · Registrar el servicio.</strong> <code class="inl">Program.cs</code> es el archivo donde se configuran los servicios de la aplicación: ahí le decimos al <b>contenedor de inyección de dependencias</b> qué servicios existen y con qué «vida» (Scoped o Singleton). Después, cada página los pide con <code class="inl">@inject</code>, que es lo que vas a hacer en 3B.</p>
+        <p>Abrí <code class="inl">Program.cs</code> y completá el TODO 2. El contenedor se arma en <code class="inl">Build()</code>, así que la línea tiene que quedar antes:</p>
+        <pre data-file="Program.cs" data-lang="cs">
+using LabBlazor;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// ... acá quedan las líneas que ya traía la plantilla ...
+
+// TODO 2: registrar TareaServicio en el contenedor con vida Scoped
+
+var app = builder.Build();   // &lt;- todo lo de arriba tiene que ir ANTES de esta línea</pre>
+        <div class="call hint">
+          <span class="lbl">Pista</span>Un servicio se registra con una línea de este estilo: <code class="inl">builder.Services.AddScoped&lt;MiClase&gt;();</code>. El nombre del método elige la <b>vida</b> del servicio (<code class="inl">AddScoped</code>, <code class="inl">AddSingleton</code> o <code class="inl">AddTransient</code>) y entre los signos <code class="inl">&lt;&gt;</code> va el <b>nombre de la clase</b> que querés registrar.
+        </div>
+        <p><strong>3B · Inyectar y conectar la página.</strong> Reemplazá todo el contenido de <code class="inl">Tareas.razor</code> por esto. Rider va a marcar en rojo <code class="inl">Servicio</code> hasta que resuelvas el TODO 3:</p>
+        <pre data-file="Components/Pages/Tareas.razor" data-lang="cs">
+@page "/tareas"
+@rendermode InteractiveServer
+@* TODO 3: inyectá acá el servicio (tipo TareaServicio, nombre Servicio) *@
+
+&lt;PageTitle&gt;Tareas&lt;/PageTitle&gt;
+
+&lt;h1&gt;Mis tareas&lt;/h1&gt;
+
+&lt;p&gt;
+    Instancia del servicio:
+    &lt;strong&gt;@(RendererInfo.IsInteractive ? Servicio.IdInstancia : "conectando…")&lt;/strong&gt;
+&lt;/p&gt;
+
+&lt;input class="form-control mb-2" @bind="texto" @bind:event="oninput" placeholder="Título de la tarea" /&gt;
+&lt;button class="btn btn-primary mb-3" @onclick="Guardar"&gt;@(editandoId is null ? "Agregar" : "Guardar cambios")&lt;/button&gt;
+
+&lt;ul&gt;
+    @foreach (var t in Servicio.Listar())
+    {
+        &lt;li&gt;
+            @t.Titulo
+            &lt;button class="btn btn-sm btn-outline-secondary" @onclick="() =&gt; Editar(t)"&gt;Editar&lt;/button&gt;
+            &lt;button class="btn btn-sm btn-outline-danger" @onclick="() =&gt; Quitar(t.Id)"&gt;Quitar&lt;/button&gt;
+        &lt;/li&gt;
+    }
+&lt;/ul&gt;
+
+@code {
+    private string texto = "";
+    private int? editandoId;
+
+    private void Guardar()
+    {
+        if (string.IsNullOrWhiteSpace(texto)) return;
+
+        if (editandoId is null)
+        {
+            // TODO 4: agregar la tarea usando el servicio
+        }
+        else
+        {
+            // TODO 5: editar la tarea usando el servicio
+        }
+
+        texto = "";
+        editandoId = null;
+    }
+
+    private void Editar(Tarea t)
+    {
+        editandoId = t.Id;
+        texto = t.Titulo;
+    }
+
+    private void Quitar(int id)
+    {
+        // TODO 6: quitar la tarea usando el servicio
+    }
+}</pre>
+        <div class="call hint">
+          <span class="lbl">Pista</span>Para inyectar un servicio en una página se escribe una sola línea con este esquema: <code class="inl">@inject TipoDelServicio NombreQueElijas</code>. Primero va el <b>tipo</b> (la clase del servicio) y después el <b>nombre</b> con el que lo vas a usar en el resto de la página: fijate cuál aparece en el código de arriba. Los TODO 4, 5 y 6 se resuelven llamando a los métodos del servicio. Mirá qué métodos tiene <code class="inl">TareaServicio</code> (paso 2) y qué datos necesita cada uno. La línea <code class="inl">@rendermode InteractiveServer</code> ya viene puesta: es la que hace que los botones respondan.
+        </div>
+        <div class="call hint">
+          <span class="lbl">Si aparece un error al abrir /tareas</span>Una <code class="inl">InvalidOperationException</code> que dice <em>Cannot provide a value for property 'Servicio'… There is no registered service of type…</em> significa que falta el TODO 2: el servicio está pedido pero nunca fue registrado.
+        </div>
+        <p><strong>3C · Probar.</strong> ▶ Run, abrí <code class="inl">/tareas</code> y agregá tres tareas, editá una y quitá otra.</p>
+        <div class="call check">
+          <span class="lbl">Checkpoint</span>Las tres operaciones andan (al tocar <em>Editar</em> el botón pasa a decir <b>Guardar cambios</b>) y en <em>Instancia del servicio</em> aparece un código de 6 caracteres.
+        </div>
+        <div class="call think">
+          <span class="lbl">Para pensar</span>En ningún lado escribiste <code class="inl">new TareaServicio()</code> y aun así <code class="inl">Servicio</code> tiene una instancia lista para usar. ¿Quién la creó? ¿Cuándo?
+        </div>
+      </section>
+
+      <!-- ===== PASO 4: Prueba 1: el servicio Scoped ===== -->
+      <section class="step" id="paso-4">
+        <div class="num">4</div>
+        <h3>Prueba 1: el servicio Scoped</h3>
+        <p class="goal">dos pestañas + F5</p>
+        <p>Sin tocar nada del código, vas a mirar lo mismo desde dos pestañas. <strong>Escribí tu predicción antes de mirar.</strong></p>
+        <ol class="mini">
+          <li>En la <b>pestaña A</b> (<code class="inl">/tareas</code>) dejá las tareas que ya cargaste y anotá el código de instancia.</li>
+          <li>Abrí la <b>pestaña B</b>: una pestaña nueva del navegador con la <b>misma dirección</b> <code class="inl">http://localhost:PUERTO/tareas</code>. Anotá qué lista ve y su código.</li>
+          <li>En B agregá una tarea y volvé a A.</li>
+          <li>En A apretá <kbd>F5</kbd>.</li>
+        </ol>
+        <div class="codes">
+          <span>Código de instancia</span><label>Pestaña A <input type="text" maxlength="8" data-k="c4-a" aria-label="Código en A"></label><label>Pestaña B <input type="text" maxlength="8" data-k="c4-b" aria-label="Código en B"></label>
+        </div>
+        <div class="wide">
+          <table class="log">
+            <thead>
+              <tr>
+                <th>Qué hicimos</th>
+                <th>Predicción (antes de mirar)</th>
+                <th>Qué pasó</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Abrimos B con la misma dirección</td>
+                <td><input type="text" data-k="b4-0-p" aria-label="Predicción"></td>
+                <td><input type="text" data-k="b4-0-r" aria-label="Qué pasó"></td>
+              </tr>
+              <tr>
+                <td>Agregamos una tarea en B y volvemos a A</td>
+                <td><input type="text" data-k="b4-1-p" aria-label="Predicción"></td>
+                <td><input type="text" data-k="b4-1-r" aria-label="Qué pasó"></td>
+              </tr>
+              <tr>
+                <td>F5 en A</td>
+                <td><input type="text" data-k="b4-2-p" aria-label="Predicción"></td>
+                <td><input type="text" data-k="b4-2-r" aria-label="Qué pasó"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="call check">
+          <span class="lbl">Checkpoint</span>Completaron predicción y resultado en las tres filas y anotaron los dos códigos.
+        </div>
+        <div class="call think">
+          <span class="lbl">Para pensar</span>Misma dirección, mismo código, dos pestañas. ¿Qué es lo que nace y muere con cada pestaña? ¿Cuánto dura, exactamente, un «scope» en esta app?
+        </div>
+      </section>
+
+      <!-- ===== PASO 5: Cambiá una palabra ===== -->
+      <section class="step" id="paso-5">
+        <div class="num">5</div>
+        <h3>Cambiá una palabra</h3>
+        <p class="goal">de Scoped a Singleton</p>
+        <p>Ahora el cambio de una sola palabra. El resto del código no se toca.</p>
+        <ol class="mini">
+          <li>En Rider: <kbd>■ Stop</kbd>. <b>Cerrá las dos pestañas viejas</b> del navegador: quedaron desconectadas.</li>
+          <li>En <code class="inl">Program.cs</code>, resolvé el TODO 7:</li>
+        </ol>
+        <pre data-file="Program.cs" data-lang="cs">
+// TODO 7: cambiá SOLO la palabra Scoped por Singleton (misma línea, no agregues otra)
+builder.Services.AddScoped&lt;TareaServicio&gt;();</pre>
+        <ol class="mini" start="3">
+          <li><kbd>▶ Run</kbd>. Rider abre una pestaña nueva en la Home: escribí a mano <code class="inl">/tareas</code> (será la <b>pestaña A</b>).</li>
+          <li>Repitan el experimento del paso 4: tareas en A, predicción, abrir B, agregar en B y volver a A, <kbd>F5</kbd> en A.</li>
+          <li>Última fila: <kbd>■ Stop</kbd> y <kbd>▶ Run</kbd> de nuevo. ¿Qué pasa con la lista?</li>
+        </ol>
+        <div class="codes">
+          <span>Código de instancia</span><label>Pestaña A <input type="text" maxlength="8" data-k="c5-a" aria-label="Código en A"></label><label>Pestaña B <input type="text" maxlength="8" data-k="c5-b" aria-label="Código en B"></label>
+        </div>
+        <div class="wide">
+          <table class="log">
+            <thead>
+              <tr>
+                <th>Qué hicimos</th>
+                <th>Predicción (antes de mirar)</th>
+                <th>Qué pasó</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Abrimos B con la misma dirección</td>
+                <td><input type="text" data-k="b5-0-p" aria-label="Predicción"></td>
+                <td><input type="text" data-k="b5-0-r" aria-label="Qué pasó"></td>
+              </tr>
+              <tr>
+                <td>Agregamos una tarea en B y volvemos a A sin tocar nada</td>
+                <td><input type="text" data-k="b5-1-p" aria-label="Predicción"></td>
+                <td><input type="text" data-k="b5-1-r" aria-label="Qué pasó"></td>
+              </tr>
+              <tr>
+                <td>F5 en A</td>
+                <td><input type="text" data-k="b5-2-p" aria-label="Predicción"></td>
+                <td><input type="text" data-k="b5-2-r" aria-label="Qué pasó"></td>
+              </tr>
+              <tr>
+                <td>■ Stop y ▶ Run (se reinicia la app)</td>
+                <td><input type="text" data-k="b5-3-p" aria-label="Predicción"></td>
+                <td><input type="text" data-k="b5-3-r" aria-label="Qué pasó"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="call check">
+          <span class="lbl">Checkpoint</span>Si en B ves las tareas que cargaste en A <b>y el mismo código de instancia</b>, la app está en Singleton. Si B sigue vacía y con otro código, la app sigue en Scoped: revisá la trampa de arriba.
+        </div>
+        <div class="call think">
+          <span class="lbl">Para pensar</span>Mirá la fila 2 de la bitácora: ¿A se enteró sola de lo que agregó B? Si no, ¿por qué no? Y con Singleton todos ven lo mismo… hasta que reiniciás la app: ¿dónde viven realmente esos datos?
+        </div>
+      </section>
+
+      <!-- ===== PASO 6: Enlazar la página desde el menú ===== -->
+      <section class="step" id="paso-6">
+        <div class="num">6</div>
+        <h3>Enlazar la página desde el menú</h3>
+        <p class="goal">NavMenu.razor + NavLink</p>
+        <p>Hasta ahora llegabas a tu página escribiendo <code class="inl">/tareas</code> a mano. En este paso la conectás al menú lateral, para entrar desde la Home con un click y volver, sin tocar la barra de direcciones.</p>
+        <p>Abrí <code class="inl">Components/Layout/NavMenu.razor</code>. Ahí está el menú lateral: cada opción (Home, Counter, Weather) es un bloque con un <code class="inl">NavLink</code>.</p>
+        <p><strong>TODO 8:</strong> agregá una opción nueva, debajo de las que ya están, que lleve a tu página de tareas.</p>
+        <div class="call hint">
+          <span class="lbl">Pista</span>Un <code class="inl">NavLink</code> lleva a otra página con su atributo <code class="inl">href</code> (la ruta que definiste con <code class="inl">@page</code>) y muestra el texto que pongas adentro. Lo más simple es copiar una de las opciones que ya existen, pegarla debajo y cambiar la ruta y el texto.
+        </div>
+        <p>Detené la app con <kbd>■ Stop</kbd> y volvé a correrla con <kbd>▶ Run</kbd>. Se abre en la Home, en la dirección de siempre, sin <code class="inl">/tareas</code>. Probá el recorrido completo: entrá a tu página desde el menú, volvé a la Home desde el menú y entrá de nuevo.</p>
+        <div class="call check">
+          <span class="lbl">Checkpoint</span>Desde la Home llegás a la página de tareas con un click en tu opción del menú, y con un click en <b>Home</b> volvés. Sin escribir la dirección a mano.
+        </div>
+      </section>
+    </div>
+
+    <!-- ===== VUELTA EXTRA ===== -->
+    <div class="challenge">
+      <h2>🏁 Vuelta extra (opcional)</h2>
+      <p class="goal">para los que terminaron antes</p>
+      <ul>
+        <li>Sumá una property <code class="inl">bool Hecha</code> a <code class="inl">Tarea</code> y un botón para marcarla como hecha.</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
