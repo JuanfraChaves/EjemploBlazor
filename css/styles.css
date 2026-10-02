@@ -134,6 +134,49 @@
   .code pre .str{color:var(--code-str)}
   .code pre .key{color:var(--code-key)}
 
+  /* Bloque de prompt: se envía a una IA y se copia entero. */
+  .prompt{
+    background:var(--surface);border:1px solid var(--line-strong);border-left:4px solid var(--accent);
+    border-radius:0 12px 12px 0;box-shadow:var(--shadow);margin:6px 0 16px;overflow:hidden;
+  }
+  .prompt .bar{
+    display:flex;align-items:center;gap:8px;padding:8px 12px 8px 14px;
+    border-bottom:1px solid var(--line);background:var(--surface-2);
+  }
+  .prompt .bar .tag{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;font-weight:600;
+    text-transform:uppercase;letter-spacing:.09em;color:var(--accent-ink);
+  }
+  .prompt .bar .go{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;color:var(--ink-3);margin-right:auto;
+  }
+  .prompt .bar .copy{
+    font:inherit;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;color:var(--ink-2);
+    background:var(--surface);border:1px solid var(--line-strong);border-radius:7px;padding:3px 10px;
+    cursor:pointer;white-space:nowrap;
+  }
+  .prompt .bar .copy:hover{color:var(--ink);border-color:var(--accent)}
+  .prompt .bar .copy[data-state="ok"]{color:var(--go);border-color:var(--go-line);background:var(--go-bg)}
+  .prompt pre{
+    margin:0;padding:14px 16px;white-space:pre-wrap;overflow-wrap:anywhere;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;line-height:1.65;color:var(--ink-2);
+  }
+  /* Los [ejemplo: ...] hay que reemplazarlos antes de mandar el prompt. */
+  .prompt .ph{
+    background:var(--hint-bg);border:1px solid var(--hint-line);color:var(--hint);
+    border-radius:4px;padding:0 4px;font-style:normal;
+  }
+
+  .boceto{margin:8px 0 16px}
+  .boceto img{
+    display:block;width:100%;height:auto;background:var(--surface);
+    border:1px solid var(--line-strong);border-radius:11px;box-shadow:var(--shadow);
+  }
+  .boceto figcaption{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;color:var(--ink-3);
+    margin-top:8px;line-height:1.5;
+  }
+
   .call{border-radius:11px;padding:14px 16px;margin:6px 0 16px;font-size:14.5px;color:var(--ink)}
   .call .lbl{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;display:block;margin-bottom:4px}
   .call b{font-weight:600}
